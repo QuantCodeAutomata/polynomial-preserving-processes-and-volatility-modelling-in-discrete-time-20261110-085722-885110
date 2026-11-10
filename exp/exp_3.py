@@ -95,7 +95,9 @@ def run_model_convergence(model: str, model_index: int) -> dict:
             skipped[n] = f"simulation failure: {exc}"
             continue
 
-        y_T, h_T = sim["y"][:, -1], sim["h"][:, -1]
+        # sim["y"][:, k] holds the per-period return y_{(k+1)tau} (Eq. 9), not a
+        # cumulative price; the càdlàg extension's terminal value is their sum.
+        y_T, h_T = sim["y"].sum(axis=1), sim["h"][:, -1]
         ks_h = ks_2samp(h_T, h_ref)
         ks_y = ks_2samp(y_T, y_ref)
         per_n[n] = {

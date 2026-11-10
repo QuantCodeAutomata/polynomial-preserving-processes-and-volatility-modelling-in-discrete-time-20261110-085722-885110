@@ -12,7 +12,7 @@ import numpy as np
 # ---------------------------------------------------------------------------
 RNG_SEED = 20240101  # base random seed, not specified in the paper
 MC_PATHS_VERIFICATION = 100_000  # Monte Carlo paths for moment-formula checks, paper Sec. 2.3 (>=100,000 required)
-MC_PATHS_VERIFICATION_RUN = 20_000  # reduced path count used in the executed run to fit the time budget (see RESULTS.md)
+MC_PATHS_VERIFICATION_RUN = 20_000  # reduced path count used in the executed run to fit the time available for this replication (see RESULTS.md)
 
 # ---------------------------------------------------------------------------
 # exp_1: VPGARCH-SV specification, positivity, variance moments
@@ -77,7 +77,7 @@ EXP3_H0 = EXP3_SIGMA2  # initial variance state, set at the long-run level
 EXP3_HORIZON_L = 1.0  # time horizon L (years), Sec. 3.2, not specified in the paper
 EXP3_N_GRID_FINE = 5000  # Euler grid steps for the limiting diffusion, not specified in the paper ("fine grid")
 EXP3_N_LIST = (1, 2, 4, 8, 16, 32, 64, 128)  # number of periods per year n=1/tau, Sec. 3.2
-EXP3_N_LIST_RUN = (1, 2, 4, 8, 16, 32)  # reduced n grid actually executed to fit the time budget (see RESULTS.md)
+EXP3_N_LIST_RUN = (1, 2, 4, 8, 16, 32)  # reduced n grid actually executed to fit the time available for this replication (see RESULTS.md)
 EXP3_N_PATHS = 10_000  # number of simulated paths, Sec. 3.2 ("N>=10,000")
 EXP3_N_PATHS_RUN = 4_000  # reduced path count used in the executed run (see RESULTS.md)
 EXP3_MAX_DEGREE = 2  # polynomial degree m for the generator-matrix comparison, Corollary 3
@@ -154,7 +154,7 @@ EXP7_UNDERLYING = "SPY"  # S&P 500 ETF proxy for the option-chain snapshot
 EXP7_N_WEEKS_PAPER = 1443  # number of weekly calibration dates reported in the paper, Sec. 4.1
 EXP7_N_SNAPSHOTS_RUN = 1  # number of live option-chain snapshots actually calibrated (data availability, not a time reduction)
 EXP7_MC_PATHS_PAPER = 50_000  # Monte Carlo paths per calibration, Sec. 4.3
-EXP7_MC_PATHS_RUN = 4_000  # reduced path count used in the executed run (see RESULTS.md)
+EXP7_MC_PATHS_RUN = 1_500  # reduced path count used in the executed run (see RESULTS.md)
 EXP7_XI2 = 0.0  # variance risk-preference parameter fixed at zero, Sec. 4.3 (monotonic pricing kernel)
 EXP7_MIN_MATURITY_DAYS = 7  # minimum option maturity filter (calendar days), Sec. 4.1
 EXP7_MAX_MATURITY_DAYS = 365  # maximum option maturity filter (calendar days), Sec. 4.1

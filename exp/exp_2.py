@@ -93,7 +93,8 @@ def remark2_check() -> dict:
     x = 1.1e-4
     eps2 = rng.standard_normal(5000)
     h1 = jp.h_next(np.full(5000, x), eps2, p_h)
-    h2 = p_h.omega + p_h.phi * x + alpha * (eps2 - gamma * np.sqrt(x)) ** 2 - alpha
+    # Paper Remark 2 (p. 13): h_{t+1} = omega + phi*h_t + alpha*[eps2^2 - 2*gamma*sqrt(h_t)*eps2 - 1].
+    h2 = p_h.omega + p_h.phi * x + alpha * (eps2 ** 2 - 2 * gamma * np.sqrt(x) * eps2 - 1)
     max_abs_diff = float(np.max(np.abs(h1 - h2)))
     return {
         "alpha": alpha, "gamma": gamma, "rho_sv": 0.6,

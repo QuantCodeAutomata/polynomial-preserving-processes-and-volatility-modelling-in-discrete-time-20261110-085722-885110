@@ -1813,8 +1813,8 @@
     "alpha": 1.2e-06,
     "gamma": 120.0,
     "rho_sv": 0.6,
-    "max_abs_diff_recursion_vs_hn2000_form": 1.9008000000000208e-06,
-    "matches": false,
+    "max_abs_diff_recursion_vs_hn2000_form": 2.710505431213761e-20,
+    "matches": true,
     "hngarch_sv_positivity_all": true,
     "hngarch_positivity_all": true
   }

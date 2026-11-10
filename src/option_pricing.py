@@ -48,6 +48,45 @@ def implied_vol(price: float, spot: float, strike: float, rate: float, ttm: floa
         return float("nan")
 
 
+def implied_vol_vec(
+    prices: np.ndarray,
+    spot: float,
+    strikes: np.ndarray,
+    rate: float,
+    ttms: np.ndarray,
+    is_call: np.ndarray,
+    init_vol: np.ndarray | float = 0.2,
+    n_iter: int = 80,
+) -> np.ndarray:
+    """Vectorized Black-Scholes implied-volatility inversion by damped Newton-
+    Raphson with vega (fully array-valued so that one weekly cross-section of
+    several thousand quotes is inverted in a handful of numpy passes instead
+    of one scipy.optimize.brentq call per option, as used by `implied_vol`).
+    """
+    strikes = np.asarray(strikes, dtype=float)
+    ttms = np.asarray(ttms, dtype=float)
+    is_call = np.asarray(is_call, dtype=bool)
+    prices = np.asarray(prices, dtype=float)
+    disc_strike = strikes * np.exp(-rate * ttms)
+    intrinsic = np.where(is_call, np.maximum(spot - disc_strike, 0.0), np.maximum(disc_strike - spot, 0.0))
+    vol = np.full(strikes.shape, init_vol, dtype=float) if np.isscalar(init_vol) else np.array(init_vol, dtype=float)
+    vol = np.clip(vol, 1e-3, 3.0)
+    valid = (prices > intrinsic + 1e-12) & (ttms > 0)
+    for _ in range(n_iter):
+        sqrt_t = np.sqrt(np.maximum(ttms, 1e-12))
+        d1 = (np.log(spot / np.maximum(strikes, 1e-12)) + (rate + 0.5 * vol**2) * ttms) / (vol * sqrt_t)
+        d2 = d1 - vol * sqrt_t
+        call_price = spot * norm.cdf(d1) - strikes * np.exp(-rate * ttms) * norm.cdf(d2)
+        model_price = np.where(is_call, call_price, call_price - spot + strikes * np.exp(-rate * ttms))
+        vega = spot * norm.pdf(d1) * sqrt_t
+        vega = np.where(vega < 1e-8, 1e-8, vega)
+        step = (model_price - prices) / vega
+        vol = np.clip(vol - step, 1e-4, 5.0)
+    result = np.where(valid, vol, 1e-6)
+    result = np.where(np.isfinite(result), result, np.nan)
+    return result
+
+
 def _xi1_gaussian(h: float, tau: float, r: float, lam: float, rho: float) -> float:
     """xi1 solving the stock martingale restriction with xi2=0, Gaussian eps1 (Eq. B.2)."""
     sqrt_th = math.sqrt(max(tau * h, 0.0))
@@ -177,9 +216,9 @@ def mc_option_prices(
 def ivrmse(model_prices: np.ndarray, market_ivs: np.ndarray, spot: float, strikes: np.ndarray,
            rate_daily: float, ttms_days: np.ndarray, is_call: np.ndarray) -> float:
     """IVRMSE = sqrt(mean((IV^model - IV^market)^2)) (Sec. 4.3)."""
-    model_ivs = np.array([
-        implied_vol(model_prices[i], spot, strikes[i], rate_daily, ttms_days[i] / 252.0, bool(is_call[i]))
-        for i in range(len(strikes))
-    ])
+    model_ivs = implied_vol_vec(
+        model_prices, spot, strikes, rate_daily, np.asarray(ttms_days, dtype=float) / 252.0, is_call,
+        init_vol=np.clip(market_ivs, 0.05, 2.0),
+    )
     valid = np.isfinite(model_ivs)
     return float(np.sqrt(np.mean((model_ivs[valid] - market_ivs[valid]) ** 2)))

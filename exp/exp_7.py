@@ -11,7 +11,7 @@ The paper calibrates 1,443 weekly OptionMetrics/WRDS cross-sections
 the Massive API used here, so this script calibrates to a single live SPY
 option-chain cross-section obtained from Massive's option-chain snapshot
 endpoint (see "Not reproduced" in results/RESULTS.md). Monte Carlo paths and
-optimizer iterations are also reduced from the paper's configuration; both
+the optimizer's iteration cap is also reduced from the paper's configuration; both
 reductions are recorded in results/RESULTS.md.
 """
 from __future__ import annotations
@@ -82,23 +82,25 @@ def load_filtered_chain() -> tuple[np.ndarray, np.ndarray, np.ndarray, np.ndarra
 
 
 def _init_theta(model: str, dist: str) -> np.ndarray:
-    """Starting values: moderate persistence and a small negative leverage
-    loading, typical of daily equity-index GARCH fits (Sec. 4.2 discusses
-    negative eta estimates across all four models)."""
+    """Starting values with the same variance-scaled parametrization used for
+    the return-based MLE start (src.estimation.fit_model): b0, a1 in variance
+    units, eta scaled by sqrt(v) for the square-root loadings (HNGARCH/JPGARCH/
+    VPGARCH) so that the Proposition 3/4 bound eta^2 <= 4*b0*(phi-b1) is
+    satisfied at the starting point, and b1 a dimensionless multiplier of h."""
     names = PARAM_NAMES[model]
-    daily_var = (0.16 ** 2) / 252.0  # ~16% annualized volatility, long-run variance
+    v = (0.16 ** 2) / 252.0  # ~16% annualized volatility, long-run variance units
     raw = {
-        "phi": math.log(0.95 / (1.0 - 0.95 / 0.999)),
-        "sigma2": math.log(daily_var),
-        "lam": 2.0,
-        "eta": -0.5 if model in ("HNGARCH", "JPGARCH", "VPGARCH") else -60.0,
-        "a1": math.log(0.5),
-        "b0": math.log(daily_var * 0.05),
+        "phi": 2.0,  # phi near 0.87 after the logit map, as in fit_model
+        "sigma2": math.log(v),
+        "lam": 0.0,
+        "eta": -0.2 * math.sqrt(v) if model in ("HNGARCH", "JPGARCH") else -0.05,
+        "a1": math.log(0.1 * v),
+        "b0": math.log(0.1 * v),
         "b1": math.log(0.05),
     }
     theta = np.array([raw[n] for n in names])
     if dist == "nig":
-        theta = np.append(theta, math.log(0.43))  # nu starting value, Sec. 4.2's estimated range
+        theta = np.append(theta, math.log(0.4))  # nu starting value, Sec. 4.2's estimated range
     return theta
 
 
@@ -173,12 +175,9 @@ def main(n_paths: int | None = None, maxiter: int | None = None) -> dict:
             nu = r["nu"]
             cfg = OptionMCConfig(n_paths=n_paths, seed=1)
             prices = mc_option_prices(p, r["model"], dist, nu, strikes, ttms, is_call, spot, rate_daily, cfg)
-            model_iv = np.array([
-                np.nan if not np.isfinite(prices[i]) else prices[i] for i in range(len(prices))
-            ])
-            from src.option_pricing import implied_vol
-            model_iv = np.array([implied_vol(prices[i], spot, strikes[i], rate_daily, ttms[i] / 252.0, bool(is_call[i]))
-                                  for i in range(len(prices))])
+            from src.option_pricing import implied_vol_vec
+            model_iv = implied_vol_vec(prices, spot, strikes, rate_daily, ttms / 252.0, is_call,
+                                        init_vol=np.clip(market_iv, 0.05, 2.0))
             ax.plot((strikes / spot)[order], model_iv[order], alpha=0.5,
                     label=f"{r['model']}-{dist}" if dist == "gaussian" else None, lw=1)
     ax.scatter(strikes / spot, market_iv, s=8, color="black", label="market", zorder=5)
