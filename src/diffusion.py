@@ -138,3 +138,59 @@ def moment_via_generator(G: np.ndarray, x0: float, t: float, degree: int) -> flo
     p = np.zeros(m + 1)
     p[degree] = 1.0
     return float(H @ expm(t * G) @ p)
+
+
+def discrete_params_from_assumption1(p: DiffusionLimitParams, n: int) -> "VPGARCHParams | JPGARCHParams":
+    """Assumption-1 parameter scaling at tau=1/n (Sec. 3.1-3.2).
+
+    Maps the limiting-diffusion coefficients in ``p`` to the one-step
+    VPGARCH-SV / JPGARCH-SV parameters under the scaling of Assumption 1:
+
+        tau = 1/n
+        phi(tau) = 1 - kappa*tau
+        sigma2(tau) = sigma2
+        lambda(tau) = lam*tau
+        eta(tau) = eta*sqrt(tau)
+        b0(tau) = b0*sqrt(tau), b1(tau) = b1*sqrt(tau)
+        a0(tau) = a0, a1(tau) = a1  (VP only; unscaled, per Assumption 1)
+
+    Returns a ``VPGARCHParams`` if ``p.model == "VP"`` else a
+    ``JPGARCHParams``. Does not silently clip: if the resulting discrete-time
+    parameters violate the Proposition 3 (VP) / Proposition 4 (JP) positivity
+    restrictions, raises ValueError naming ``n`` and the violated conditions;
+    the caller is expected to catch this and skip that ``n``.
+    """
+    from src.jpgarch_sv import JPGARCHParams
+    from src.jpgarch_sv import check_positivity as check_positivity_jp
+    from src.vpgarch_sv import VPGARCHParams
+    from src.vpgarch_sv import check_positivity as check_positivity_vp
+
+    tau = 1.0 / n
+    phi = 1.0 - p.kappa * tau
+    lam_tau = p.lam * tau
+    eta_tau = p.eta * np.sqrt(tau)
+    b0_tau = p.b0 * np.sqrt(tau)
+    b1_tau = p.b1 * np.sqrt(tau)
+
+    if p.model == "VP":
+        disc = VPGARCHParams(
+            tau=tau, rho=p.rho, r=p.r, lam=lam_tau, sigma2=p.sigma2, phi=phi,
+            eta=eta_tau, a0=p.a0, a1=p.a1, b0=b0_tau, b1=b1_tau,
+        )
+        conds = check_positivity_vp(disc)
+    elif p.model == "JP":
+        disc = JPGARCHParams(
+            tau=tau, rho=p.rho, r=p.r, lam=lam_tau, sigma2=p.sigma2, phi=phi,
+            eta=eta_tau, b0=b0_tau, b1=b1_tau,
+        )
+        conds = check_positivity_jp(disc)
+    else:
+        raise ValueError(f"unknown model {p.model!r}")
+
+    if not conds["all"]:
+        violated = [k for k, v in conds.items() if k != "all" and not v]
+        raise ValueError(
+            f"n={n} (tau={tau:.6g}): Assumption-1 discrete parameters violate "
+            f"positivity restrictions: {violated}"
+        )
+    return disc

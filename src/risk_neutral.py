@@ -119,3 +119,18 @@ def check_preservation_jpgarch_q(rho: float, eta: float, b0: float, b1: float, x
         "cond2_residual": cond2,
         "preserved": bool(abs(cond1) < 1e-8 and abs(cond2) < 1e-8),
     }
+
+
+def risk_neutral_tilts_general(rho: float, A1: float, A2: float, B: float) -> dict:
+    """General (possibly nonzero B) Gaussian tilting formulas of Proposition 9.
+
+    R2 = 1/(1-2*B), P2 = (A2+rho*A1)/(1-2*B), R1 = (1-rho^2)+rho^2*R2,
+    P1 = (1-rho^2)*A1+rho*P2. Valid for B < 1/2 (cgf domain, Eq. B.1).
+    """
+    if B >= 0.5:
+        raise ValueError("cgf domain violated: B must be < 1/2")
+    r2 = 1.0 / (1.0 - 2.0 * B)
+    p2 = (A2 + rho * A1) / (1.0 - 2.0 * B)
+    r1 = (1.0 - rho**2) + rho**2 * r2
+    p1 = (1.0 - rho**2) * A1 + rho * p2
+    return {"P1": p1, "P2": p2, "R1": r1, "R2": r2}

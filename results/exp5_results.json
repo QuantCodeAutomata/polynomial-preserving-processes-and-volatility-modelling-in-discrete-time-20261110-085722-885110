@@ -1,0 +1,100 @@
+{
+  "positivity": {
+    "vp": {
+      "a0_nonneg": true,
+      "a1_bound": "True",
+      "b0_nonneg": true,
+      "b1_pos": true,
+      "delta2_nonpos": true,
+      "delta0_nonpos": true,
+      "delta1_bound": "True",
+      "all": true
+    },
+    "jp": {
+      "b0_nonneg": true,
+      "b1_nonneg": true,
+      "b0_le_omega": true,
+      "b1_le_phi": true,
+      "b0_plus_b1_pos": true,
+      "eta_bound": "True",
+      "all": true
+    }
+  },
+  "base_case": {
+    "kernel": {
+      "tau": 1.0,
+      "r": 0.0,
+      "rho": 0.6,
+      "xi2": 0.0
+    },
+    "h0": 0.0001,
+    "xi1": -0.5199999999999463,
+    "xi0": -1.3519999999997207e-05,
+    "martingale_check": {
+      "E_N": 1.0000195258385367,
+      "target_bond": 1.0,
+      "E_N_exp_y": 0.9999801171519268,
+      "target_stock": 1.0,
+      "se_E_N": 3.6615010208899516e-05,
+      "se_E_N_exp_y": 3.3805045136951806e-05,
+      "bond_restriction_ok": true,
+      "stock_restriction_ok": true
+    },
+    "tilts": {
+      "P1": -0.0033279999999996563,
+      "P2": 0.0,
+      "R1": 1.0,
+      "R2": 1.0,
+      "h_star": 0.0001,
+      "rho_star": 0.6
+    },
+    "h_star_from_tilts": 0.0001
+  },
+  "proposition10_general_tilts": {
+    "B": -5.0,
+    "R1_general": 0.6727272727272727,
+    "R2_general": 0.09090909090909091,
+    "lam_preserving": -0.33636363636363636,
+    "lam_tau_r1_residual": 0.0
+  },
+  "vp_preservation": {
+    "config_case": {
+      "lambda_condition_residual": 0.0,
+      "divisibility_residual": -0.0,
+      "preserved": true
+    },
+    "perturbed_case": {
+      "lambda_condition_residual": 0.0,
+      "divisibility_residual": -2.592e-07,
+      "preserved": false
+    },
+    "b0_perturbed": 0.015
+  },
+  "jp_preservation": {
+    "config_case": {
+      "cond1_residual": 0.0,
+      "cond2_residual": 0.0,
+      "preserved": true
+    },
+    "perturbed_case": {
+      "cond1_residual": 0.0,
+      "cond2_residual": 2.88e-05,
+      "preserved": false
+    },
+    "b0_perturbed": 0.015
+  },
+  "hngarch_sv_special_case": {
+    "arbitrary_lam_tau_r1": 1.23,
+    "b0_zero_case": {
+      "cond1_residual": 0.0,
+      "cond2_residual": 0.0,
+      "preserved": true
+    },
+    "b0_nonzero_case": {
+      "cond1_residual": 0.0,
+      "cond2_residual": 0.0,
+      "preserved": true
+    },
+    "b0_nonzero_value": 0.015
+  }
+}

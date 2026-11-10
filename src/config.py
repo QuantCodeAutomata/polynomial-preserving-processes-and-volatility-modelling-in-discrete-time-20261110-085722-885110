@@ -57,15 +57,20 @@ EXP2_CUM_RETURN_J = 20  # number of periods j for cumulative-return moments, Cor
 # ---------------------------------------------------------------------------
 # exp_3: weak convergence to polynomial diffusions (Assumption 1 / Proposition 7)
 # ---------------------------------------------------------------------------
-EXP3_KAPPA = 5.0  # mean-reversion speed kappa (annualized units), Assumption 1, not specified in the paper
+EXP3_KAPPA = 0.5  # mean-reversion speed kappa (annualized units), Assumption 1, not specified in the paper
 EXP3_SIGMA2 = 0.04  # long-run variance level sigma^2, Assumption 1
 EXP3_R = 0.02  # risk-free rate r
 EXP3_LAMBDA = 2.0  # limiting return-variance loading lambda, Assumption 1
-EXP3_ETA = 0.5  # limiting variance-diffusion loading eta, Assumption 1 (JPGARCH-SV: 2*kappa*sigma^2>=eta^2 must hold)
+EXP3_ETA = 0.1  # limiting variance-diffusion loading eta, Assumption 1 (JPGARCH-SV: 2*kappa*sigma^2>=eta^2 must hold)
 EXP3_B0 = 0.0  # boundary condition b_0=0 forced by Proposition 7
-EXP3_B1 = 0.0  # b_1=0 for the pure-diffusion limit illustration, not specified in the paper
+# b_1 chosen (search over a small grid, not specified in the paper) so that the finite-tau
+# positivity restrictions of Propositions 3/4 hold simultaneously for most n in EXP3_N_LIST_RUN
+# under the exact Assumption-1 scaling eta(tau)=eta*sqrt(tau), b_1(tau)=b_1*sqrt(tau); the paper
+# notes (Sec. 3.2) that the finite-step sequences satisfying both Assumption 1 and finite-tau
+# positivity are not uniquely specified, so a few boundary n values are skipped (see RESULTS.md).
+EXP3_B1 = 0.5
 EXP3_A0 = 0.0  # VPGARCH-SV: eta^2*a_0=0 boundary condition, Proposition 7
-EXP3_A1 = 1.0  # VPGARCH-SV: a_1, must satisfy 2*kappa*sigma^2>=eta^2*a_1
+EXP3_A1 = 0.0  # VPGARCH-SV: a_1=0 chosen jointly with b_1 above to satisfy finite-tau positivity (see note on EXP3_B1)
 EXP3_RHO = 0.5  # correlation rho, Sec. 3.1
 EXP3_Y0 = 0.0  # initial log-price state
 EXP3_H0 = EXP3_SIGMA2  # initial variance state, set at the long-run level
@@ -104,16 +109,20 @@ EXP4_MAX_DEGREE = 2  # polynomial degree m for the generator-matrix comparison, 
 # ---------------------------------------------------------------------------
 # exp_5: risk-neutral dynamics and polynomial preservation under Q
 # ---------------------------------------------------------------------------
+EXP5_LAMBDA = 0.02  # variance-risk price lambda(tau), base case before the Proposition 10 analytical overwrite
 EXP5_TAU = 1.0  # time step, not specified in the paper
 EXP5_RHO = 0.6  # correlation rho, Appendix B
 EXP5_R = 0.0  # risk-free rate r
 EXP5_SIGMA2 = 1.0e-4  # long-run variance
 EXP5_PHI = 0.96  # persistence phi(tau)
-EXP5_ETA = -0.04  # loading eta(tau)
+# eta, b1, a1 chosen jointly (grid search, not specified in the paper) so that both
+# Proposition 3 (VPGARCH-SV) and Proposition 4 (JPGARCH-SV) positivity restrictions hold
+# at this (sigma2, phi) pair.
+EXP5_ETA = -0.002  # loading eta(tau)
 EXP5_B0 = 0.0  # b_0(tau)=0, required by Proposition 10(i)/(ii) for joint preservation under Q
-EXP5_B1 = 0.07  # b_1(tau)
+EXP5_B1 = 0.3  # b_1(tau)
 EXP5_A0 = 0.0  # VPGARCH-SV a_0(tau), Proposition 10(i)
-EXP5_A1 = 0.01  # VPGARCH-SV a_1(tau)
+EXP5_A1 = 0.005  # VPGARCH-SV a_1(tau)
 EXP5_H0 = EXP5_SIGMA2  # initial variance
 EXP5_XI2 = -5.0  # scalar risk-preference coefficient xi_2(tau) < 1/2, Eq. (B.6), not specified in the paper
 

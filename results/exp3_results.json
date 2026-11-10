@@ -1,0 +1,196 @@
+{
+  "models": {
+    "VP": {
+      "boundary_conditions": {
+        "b0_zero": true,
+        "eta2_a0_zero": true,
+        "non_attainment": true,
+        "all": true
+      },
+      "reference_diffusion_terminal": {
+        "mean_h": 0.03969330780438868,
+        "std_h": 0.02498808148068512,
+        "mean_y": 0.10442590453904022,
+        "std_y": 0.2083367996300854
+      },
+      "skipped_n": {
+        "1": "n=1 (tau=1): Assumption-1 discrete parameters violate positivity restrictions: ['delta2_nonpos']"
+      },
+      "per_n": {
+        "2": {
+          "tau": 0.5,
+          "ks_stat_h": 0.1735,
+          "ks_pvalue_h": 5.612227751762254e-53,
+          "ks_stat_y": 0.18325,
+          "ks_pvalue_y": 4.386106616212084e-59,
+          "mean_h_discrete": 0.04022736688322548,
+          "std_h_discrete": 0.028253609867612915,
+          "mean_y_discrete": 0.050833697004148706,
+          "std_y_discrete": 0.14299238145926021
+        },
+        "4": {
+          "tau": 0.25,
+          "ks_stat_h": 0.12125,
+          "ks_pvalue_h": 5.035786007188724e-26,
+          "ks_stat_y": 0.31175,
+          "ks_pvalue_y": 4.398516347171323e-172,
+          "mean_h_discrete": 0.03981812470581213,
+          "std_h_discrete": 0.024383044848054133,
+          "mean_y_discrete": 0.02416827547022162,
+          "std_y_discrete": 0.1017568438047746
+        },
+        "8": {
+          "tau": 0.125,
+          "ks_stat_h": 0.08225,
+          "ks_pvalue_h": 3.4442923176582238e-12,
+          "ks_stat_y": 0.3955,
+          "ks_pvalue_y": 1.0957869354761163e-279,
+          "mean_h_discrete": 0.03953242798924785,
+          "std_h_discrete": 0.02470503375298963,
+          "mean_y_discrete": 0.011478091252488677,
+          "std_y_discrete": 0.07265718996063726
+        },
+        "16": {
+          "tau": 0.0625,
+          "ks_stat_h": 0.06825,
+          "ks_pvalue_h": 1.5990667089744458e-08,
+          "ks_stat_y": 0.46975,
+          "ks_pvalue_y": 0.0,
+          "mean_h_discrete": 0.03972201124597889,
+          "std_h_discrete": 0.023417750353774424,
+          "mean_y_discrete": 0.007826168686336211,
+          "std_y_discrete": 0.04869204646524151
+        },
+        "32": {
+          "tau": 0.03125,
+          "ks_stat_h": 0.06325,
+          "ks_pvalue_h": 2.2262313534236014e-07,
+          "ks_stat_y": 0.5185,
+          "ks_pvalue_y": 0.0,
+          "mean_h_discrete": 0.04025572232077663,
+          "std_h_discrete": 0.025754649129927504,
+          "mean_y_discrete": 0.003747571310298843,
+          "std_y_discrete": 0.03594735566165428
+        }
+      },
+      "monotonic_improvement": true
+    },
+    "JP": {
+      "boundary_conditions": {
+        "b0_zero": true,
+        "non_attainment": true,
+        "all": true
+      },
+      "reference_diffusion_terminal": {
+        "mean_h": 0.0391387523199854,
+        "std_h": 0.029002227838660216,
+        "mean_y": 0.09963797850906579,
+        "std_y": 0.21165657259739432
+      },
+      "skipped_n": {
+        "32": "n=32 (tau=0.03125): Assumption-1 discrete parameters violate positivity restrictions: ['eta_bound']"
+      },
+      "per_n": {
+        "1": {
+          "tau": 1.0,
+          "ks_stat_h": 0.14725,
+          "ks_pvalue_h": 3.1769374315336454e-38,
+          "ks_stat_y": 0.044,
+          "ks_pvalue_y": 0.0008653429723425927,
+          "mean_h_discrete": 0.04032997574320525,
+          "std_h_discrete": 0.03455846827905133,
+          "mean_y_discrete": 0.10158661919234341,
+          "std_y_discrete": 0.19688252380517104
+        },
+        "2": {
+          "tau": 0.5,
+          "ks_stat_h": 0.15425,
+          "ks_pvalue_h": 6.426727919712082e-42,
+          "ks_stat_y": 0.164,
+          "ks_pvalue_y": 2.3554927355299224e-47,
+          "mean_h_discrete": 0.039315851281883286,
+          "std_h_discrete": 0.030527134624638894,
+          "mean_y_discrete": 0.04864946797348276,
+          "std_y_discrete": 0.14077400960222416
+        },
+        "4": {
+          "tau": 0.25,
+          "ks_stat_h": 0.106,
+          "ks_pvalue_h": 5.595443869778912e-20,
+          "ks_stat_y": 0.2825,
+          "ks_pvalue_y": 5.968878796028826e-141,
+          "mean_h_discrete": 0.04019757503511465,
+          "std_h_discrete": 0.030377541874378754,
+          "mean_y_discrete": 0.024026062956420558,
+          "std_y_discrete": 0.10431074300416725
+        },
+        "8": {
+          "tau": 0.125,
+          "ks_stat_h": 0.08325,
+          "ks_pvalue_h": 1.7740843852443538e-12,
+          "ks_stat_y": 0.37175,
+          "ks_pvalue_y": 2.5038226018700666e-246,
+          "mean_h_discrete": 0.039501945071092406,
+          "std_h_discrete": 0.028950536793333502,
+          "mean_y_discrete": 0.012824719129448109,
+          "std_y_discrete": 0.0710602652586044
+        },
+        "16": {
+          "tau": 0.0625,
+          "ks_stat_h": 0.069,
+          "ks_pvalue_h": 1.058733777152722e-08,
+          "ks_stat_y": 0.43925,
+          "ks_pvalue_y": 0.0,
+          "mean_h_discrete": 0.04054896115836826,
+          "std_h_discrete": 0.03073588005568748,
+          "mean_y_discrete": 0.005981535956723716,
+          "std_y_discrete": 0.05040225826795185
+        }
+      },
+      "monotonic_improvement": true
+    }
+  },
+  "matrix_convergence_corollary3": {
+    "degree_m": 2,
+    "moment_continuous_expm_degree1": 0.04,
+    "moment_via_generator_degree1": 0.04,
+    "per_n": {
+      "2": {
+        "s_steps": 2,
+        "frob_norm_diff": 0.0710127220822878,
+        "moment_discrete_Qs": 0.039999999999999994,
+        "moment_continuous_expm": 0.04,
+        "moment_via_generator": 0.04
+      },
+      "4": {
+        "s_steps": 4,
+        "frob_norm_diff": 0.031214207053984276,
+        "moment_discrete_Qs": 0.03999999999999998,
+        "moment_continuous_expm": 0.04,
+        "moment_via_generator": 0.04
+      },
+      "8": {
+        "s_steps": 8,
+        "frob_norm_diff": 0.01464070445678968,
+        "moment_discrete_Qs": 0.039999999999999966,
+        "moment_continuous_expm": 0.04,
+        "moment_via_generator": 0.04
+      },
+      "16": {
+        "s_steps": 16,
+        "frob_norm_diff": 0.0070924455479757925,
+        "moment_discrete_Qs": 0.04,
+        "moment_continuous_expm": 0.04,
+        "moment_via_generator": 0.04
+      },
+      "32": {
+        "s_steps": 32,
+        "frob_norm_diff": 0.0034909541574110344,
+        "moment_discrete_Qs": 0.039999999999999994,
+        "moment_continuous_expm": 0.04,
+        "moment_via_generator": 0.04
+      }
+    },
+    "monotonic_improvement": true
+  }
+}
