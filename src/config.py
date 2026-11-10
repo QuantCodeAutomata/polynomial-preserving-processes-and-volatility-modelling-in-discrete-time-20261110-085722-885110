@@ -159,5 +159,7 @@ EXP7_XI2 = 0.0  # variance risk-preference parameter fixed at zero, Sec. 4.3 (mo
 EXP7_MIN_MATURITY_DAYS = 7  # minimum option maturity filter (calendar days), Sec. 4.1
 EXP7_MAX_MATURITY_DAYS = 365  # maximum option maturity filter (calendar days), Sec. 4.1
 EXP7_MIN_PRICE = 0.375  # minimum option price filter (USD), Sec. 4.1
+EXP7_OPTIM_RESTARTS = 1  # number of optimizer starting values per model/distribution (reduced from "multiple starting values", Sec. 4.3; see RESULTS.md)
+EXP7_OPTIM_MAXITER = 60  # Nelder-Mead iteration cap per calibration, not specified in the paper (reduced for runtime; see RESULTS.md)
 
 RNG = np.random.default_rng(RNG_SEED)

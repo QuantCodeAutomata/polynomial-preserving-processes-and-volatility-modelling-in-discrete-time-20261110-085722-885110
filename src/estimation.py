@@ -27,6 +27,7 @@ import math
 from dataclasses import dataclass
 
 import numpy as np
+from numba import njit
 from scipy import special
 from scipy.optimize import minimize
 
@@ -34,6 +35,46 @@ from src.jpgarch_sv import JPGARCHParams
 from src.jpgarch_sv import check_positivity as check_positivity_jp
 from src.vpgarch_sv import VPGARCHParams
 from src.vpgarch_sv import check_positivity as check_positivity_vp
+
+# Integer codes for the psi_2 functional form, dispatched in the numba core
+# below; psi_3 = b0 + b1*h covers all four models (Sec. 4.2) once b0, b1 are
+# set to zero where the model omits that term (HNGARCH: b1=0, NGARCH: b0=0).
+_PSI2_SQRT_LINEAR = 0  # HNGARCH, JPGARCH: eta*sqrt(h)
+_PSI2_LINEAR = 1  # NGARCH: eta*h
+_PSI2_SQRT_QUADRATIC = 2  # VPGARCH: eta*sqrt(a0+a1*h+h^2)
+_PSI2_CODE = {"HNGARCH": _PSI2_SQRT_LINEAR, "JPGARCH": _PSI2_SQRT_LINEAR,
+              "NGARCH": _PSI2_LINEAR, "VPGARCH": _PSI2_SQRT_QUADRATIC}
+
+
+@njit(cache=True)
+def _filter_variance_core(y, psi2_code, phi, sigma2, lam, eta, a0, a1, b0, b1):
+    """Numba-compiled Eq. (9)-(10) forward recursion (h_0=sigma2, Sec. 4.2)."""
+    n = y.shape[0]
+    h = np.empty(n)
+    eps = np.empty(n)
+    h[0] = sigma2
+    omega = (1.0 - phi) * sigma2
+    ok = True
+    for t in range(n - 1):
+        ht = h[t]
+        sqrt_h = np.sqrt(ht) if ht > 1e-12 else 1e-6
+        eps[t] = (y[t] - lam * ht) / sqrt_h
+        if psi2_code == _PSI2_SQRT_LINEAR:
+            psi2_val = eta * np.sqrt(ht) if ht > 0.0 else 0.0
+        elif psi2_code == _PSI2_LINEAR:
+            psi2_val = eta * ht
+        else:
+            inner = a0 + a1 * ht + ht * ht
+            psi2_val = eta * np.sqrt(inner) if inner > 0.0 else 0.0
+        psi3_val = b0 + b1 * ht
+        h[t + 1] = omega + phi * ht + psi2_val * eps[t] + psi3_val * (eps[t] ** 2 - 1.0)
+        if h[t + 1] <= 0.0:
+            ok = False
+            break
+    if ok:
+        sqrt_h = np.sqrt(h[-1]) if h[-1] > 1e-12 else 1e-6
+        eps[-1] = (y[-1] - lam * h[-1]) / sqrt_h
+    return h, eps, ok
 
 MODELS = ("HNGARCH", "JPGARCH", "NGARCH", "VPGARCH")
 
@@ -101,24 +142,19 @@ def psi3(h: np.ndarray, model: str, p: dict) -> np.ndarray:
 
 
 def filter_variance(y: np.ndarray, model: str, p: dict) -> tuple[np.ndarray, np.ndarray]:
-    """Recover (h_t, eps_t) by iterating Eq. (9)-(10) forward from h_0=sigma2 (Sec. 4.1)."""
-    n = len(y)
-    h = np.empty(n)
-    eps = np.empty(n)
-    h[0] = p["sigma2"]
-    omega = (1.0 - p["phi"]) * p["sigma2"]
-    for t in range(n - 1):
-        sqrt_h = math.sqrt(max(h[t], 1e-12))
-        eps[t] = (y[t] - p["r"] - p["lam"] * h[t]) / sqrt_h
-        h[t + 1] = (
-            omega + p["phi"] * h[t]
-            + float(psi2(np.array([h[t]]), model, p)[0]) * eps[t]
-            + float(psi3(np.array([h[t]]), model, p)[0]) * (eps[t] ** 2 - 1.0)
-        )
-        if h[t + 1] <= 0:
-            return h, eps  # caller penalizes via -inf likelihood
-    sqrt_h = math.sqrt(max(h[-1], 1e-12))
-    eps[-1] = (y[-1] - p["r"] - p["lam"] * h[-1]) / sqrt_h
+    """Recover (h_t, eps_t) by iterating Eq. (9)-(10) forward from h_0=sigma2 (Sec. 4.1).
+
+    Delegates to a numba-compiled core (`_filter_variance_core`) since maximum
+    likelihood needs thousands of likelihood evaluations on n~6,965 daily
+    observations (Sec. 4.1); the recursion itself is exactly Eq. (9)-(10),
+    r=0 (excess-return convention).
+    """
+    h, eps, ok = _filter_variance_core(
+        np.asarray(y, dtype=np.float64), _PSI2_CODE[model],
+        p["phi"], p["sigma2"], p["lam"], p["eta"], p["a0"], p["a1"], p["b0"], p["b1"],
+    )
+    if not ok:
+        h = np.where(h <= 0, np.nan, h)
     return h, eps
 
 
@@ -211,9 +247,29 @@ def fit_model(y: np.ndarray, model: str, dist: str, x0: np.ndarray | None = None
     k = len(names) + (1 if dist == "nig" else 0)
     rng = np.random.default_rng(seed)
     if x0 is None:
+        v = float(np.var(y))
         x0 = np.zeros(k)
-        x0[0] = 2.0  # phi near 0.9 after the logit map
-        x0[1] = math.log(np.var(y))
+        all_names = list(names) + (["nu"] if dist == "nig" else [])
+        for i, name in enumerate(all_names):
+            if name == "phi":
+                x0[i] = 2.0  # phi near 0.87 after the logit map
+            elif name == "sigma2":
+                x0[i] = math.log(v)
+            elif name == "lam":
+                x0[i] = 0.0
+            elif name == "eta":
+                # HNGARCH/JPGARCH bound eta^2 <= 4*b0*(phi-b1) with b0 ~ variance units
+                # (Prop. 4), far tighter than the VPGARCH/NGARCH bound eta^2 <= 4*b1*(phi-b1)
+                # with dimensionless b1 (Prop. 3); scale the start accordingly.
+                x0[i] = -0.2 * math.sqrt(v) if model in ("HNGARCH", "JPGARCH") else -0.05
+            elif name == "b0":
+                x0[i] = math.log(0.1 * v)  # b0 has variance units (<=omega, Prop. 3/4)
+            elif name == "a1":
+                x0[i] = math.log(0.1 * v)  # a1 has variance units (added inside sqrt(.), Eq. 12)
+            elif name == "b1":
+                x0[i] = math.log(0.05)  # b1 is a dimensionless multiplier of h (<phi, Prop. 4)
+            elif name == "nu":
+                x0[i] = math.log(0.4)  # nu~0.4 near the Sec. 4.2 NIG estimates (kurtosis~4.2)
     objective = neg_loglik_gaussian if dist == "gaussian" else neg_loglik_nig
     best = None
     starts = [x0] + [x0 + rng.normal(scale=0.3, size=k) for _ in range(n_starts - 1)]

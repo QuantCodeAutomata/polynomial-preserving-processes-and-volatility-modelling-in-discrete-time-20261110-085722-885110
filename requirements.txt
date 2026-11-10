@@ -8,3 +8,4 @@ requests
 python-dotenv
 pytest
 sympy
+numba==0.60.0
