@@ -44,10 +44,10 @@ EXP2_RHO = 0.6  # correlation rho in [0,1], Eq. (9)-(10)
 EXP2_R = 0.0  # risk-free rate r
 EXP2_LAMBDA = 0.02  # lambda(tau), Eq. (11)
 EXP2_SIGMA2 = 1.0e-4  # long-run variance sigma^2(tau)
-EXP2_PHI = 0.9406388426576767  # persistence phi(tau); found by a positivity-feasible random search (Prop. 4)
-EXP2_ETA = -0.0014002425835138433  # loading eta(tau) in psi_2(x)=eta*sqrt(x), Eq. (14); satisfies Prop. 4
-EXP2_B0 = 4.376575172246737e-06  # psi_3 intercept b_0(tau), within Proposition 4 bounds
-EXP2_B1 = 0.8017564437924908  # psi_3 slope b_1(tau), within Proposition 4 bounds
+EXP2_PHI = 0.95  # persistence phi(tau); chosen within Prop. 4 positivity and degree-2 moment stability
+EXP2_ETA = -0.0025  # loading eta(tau) in psi_2(x)=eta*sqrt(x), Eq. (14); satisfies Prop. 4
+EXP2_B0 = 2.0e-06  # psi_3 intercept b_0(tau), within Proposition 4 bounds (b_0 <= omega)
+EXP2_B1 = 0.08  # psi_3 slope b_1(tau); kept small so phi^2+eta^2+(m4-1)*b1^2 < 1 even for NIG (Prop. 5-type stability)
 EXP2_H0 = EXP2_SIGMA2  # initial variance h_0
 EXP2_MAX_DEGREE = 3  # maximum polynomial degree m for the joint (y,h) basis, Sec. 2.2.2
 EXP2_HORIZONS = (1, 5, 20, 60, 252)  # horizons s for joint-moment verification, not specified in the paper
