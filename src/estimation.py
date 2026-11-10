@@ -313,11 +313,16 @@ def half_life(phi: float) -> float:
 def d_coeffs(model: str, p: dict, m4: float) -> tuple[float, float, float]:
     """d0, d1, d2 with d(x) = d0 + d1*x + d2*x^2 = Var[h_{t+1} | h_t=x] (Sec. 2.3.1/4.2).
 
-    VPGARCH: d0=eta^2*a0+(m4-1)*b0^2, d1=eta^2*a1+2*(m4-1)*b0*b1, d2=eta^2+(m4-1)*b1^2.
-    JPGARCH/HNGARCH/NGARCH: d0=(m4-1)*b0^2, d1=eta^2+2*(m4-1)*b0*b1, d2=(m4-1)*b1^2.
+    The split between d1 and d2 depends on the functional form of psi_2, not on the
+    model label: VPGARCH and NGARCH both use the quadratic loading psi_2(x) = eta*sqrt(a0+a1*x+x^2)
+    (NGARCH is the a0=a1=0 case, Remark 1), so Var[psi_2(x)*eps_2] = eta^2*(a0+a1*x+x^2) feeds
+    d0, d1 and d2. JPGARCH and HNGARCH use the square-root loading psi_2(x) = eta*sqrt(x), so
+    Var[psi_2(x)*eps_2] = eta^2*x feeds d1 only, with d2 driven solely by psi_3 = b0+b1*x.
+    VPGARCH/NGARCH: d0=eta^2*a0+(m4-1)*b0^2, d1=eta^2*a1+2*(m4-1)*b0*b1, d2=eta^2+(m4-1)*b1^2.
+    JPGARCH/HNGARCH:  d0=(m4-1)*b0^2,        d1=eta^2+2*(m4-1)*b0*b1,     d2=(m4-1)*b1^2.
     """
     eta, b0, b1 = p["eta"], p["b0"], p["b1"]
-    if model == "VPGARCH":
+    if model in ("VPGARCH", "NGARCH"):
         a0, a1 = p["a0"], p["a1"]
         return eta**2 * a0 + (m4 - 1) * b0**2, eta**2 * a1 + 2 * (m4 - 1) * b0 * b1, eta**2 + (m4 - 1) * b1**2
     return (m4 - 1) * b0**2, eta**2 + 2 * (m4 - 1) * b0 * b1, (m4 - 1) * b1**2

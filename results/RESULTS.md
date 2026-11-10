@@ -212,11 +212,11 @@ to a daily rate) as `r_t`.
   paper's qualitative "30 vs 45" direction).
 - Variance-of-variance news-impact curves (`vovnic`, Eq. 31): at a one-year
   horizon (`s=252`) and shock `epsilon=-4`, VPGARCH's VoVNIC is
-  `5.48e-7` versus NGARCH's `1.24e-3`, i.e. VPGARCH's variance-of-variance
-  propagation is three orders of magnitude weaker than NGARCH's at these
-  estimated parameters — directionally consistent with the paper's claim
-  that VPGARCH has weaker VoVNIC propagation than NGARCH, though the
-  estimated ratio (`~2,250x`) is far larger than the paper's reported ratio
+  `5.48e-7` versus NGARCH's `2.72e-3`, i.e. VPGARCH's variance-of-variance
+  propagation is almost four orders of magnitude weaker than NGARCH's at
+  these estimated parameters — directionally consistent with the paper's
+  claim that VPGARCH has weaker VoVNIC propagation than NGARCH, though the
+  estimated ratio (`~4,960x`) is far larger than the paper's reported ratio
   (`~3x`, from `2.4` vs `7.2`); the estimated parameters driving this gap
   differ from the paper's (see "Deviations from the paper").
 - **Verdict:** log-likelihood ranking and leverage sign — **reproduced**;
